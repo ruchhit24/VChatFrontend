@@ -2,15 +2,21 @@ import moment from "moment";
 import { fileFormat } from "../lib/Features";
 import RenderAttachment from "./RenderAttachment";
 import { motion } from "framer-motion";
+import CIcon from '@coreui/icons-react';
+import { cilCheckDouble} from '@coreui/icons';
+import seen from '../image/seen.png'
+import { useSelector } from "react-redux";
 
 const MessageComponent = ({ message, user }) => {
-  // console.log('message',message)
+  console.log('message',message)
   const { sender, content, attachments = [], createdAt } = message;
   const sameSender = sender?._id === user?._id;
   // console.log(sender._id,user._id)
   const messageClass = sameSender ? "self-end" : "self-start";
 
   const timeAgo = moment(createdAt).fromNow();
+
+  const { newMessagesAlert } = useSelector((state) => state.chat);
 
   return (
     <motion.div
@@ -33,7 +39,11 @@ const MessageComponent = ({ message, user }) => {
             </div>
           );
         })}
-      <h2 className="text-xs text-gray-600">{timeAgo}</h2>
+       <div className="flex items-center justify-between w-full">
+       <h2 className="text-xs text-gray-600">{timeAgo}</h2>
+      {/* <CIcon icon={cilCheckDouble} /> */}
+       { sameSender && <img src={seen } alt="Seen" width={16} height={16} className="text-gray-300"/>}
+       </div>
     </motion.div>
   );
 };

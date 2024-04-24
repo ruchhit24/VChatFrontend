@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import Modal from '@mui/material/Modal';
-import { Box, Tooltip } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import Modal from "@mui/material/Modal";
+import { Box, Tooltip } from "@mui/material";
 import { IoSearchSharp } from "react-icons/io5";
-import { SampleUser } from '../utils/SampleUser';
+import { SampleUser } from "../utils/SampleUser";
 import { IoIosAddCircle, IoIosRemoveCircle } from "react-icons/io";
-import { useInputValidation } from '6pp';
-import { useSelector } from 'react-redux';
-import { useLazySearchUserQuery, useSendFriendRequestMutation } from '../redux/api/api';
-import { toast } from 'react-hot-toast';
+import { useInputValidation } from "6pp";
+import { useSelector } from "react-redux";
+import {
+  useLazySearchUserQuery,
+  useSendFriendRequestMutation,
+} from "../redux/api/api";
+import { toast } from "react-hot-toast";
 import {
   Add as AddIcon,
   Menu as MenuIcon,
@@ -18,15 +21,15 @@ import {
 } from "@mui/icons-material";
 
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 400,
-  height: 500, 
-  overflowY: 'auto',  
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
+  height: 500,
+  overflowY: "auto",
+  bgcolor: "background.paper",
+  border: "2px solid #000",
   boxShadow: 24,
   p: 4,
 };
@@ -35,11 +38,12 @@ const Search = () => {
   const { isSearch } = useSelector((state) => state.misc);
 
   const [searchUser] = useLazySearchUserQuery();
-  const search = useInputValidation('');
+  const search = useInputValidation("");
   const [data, setData] = useState(null);
   // console.log('data',data)
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState(SampleUser);
+  console.log('users = ', users)
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
@@ -50,7 +54,7 @@ const Search = () => {
   const [sendFriendRequest] = useSendFriendRequestMutation();
 
   const addFriendHandler = async (id) => {
-    setLoading(true); 
+    setLoading(true);
 
     try {
       const res = await sendFriendRequest({ userId: id });
@@ -72,9 +76,9 @@ const Search = () => {
   const requestSentHandler = (user) => {
     if (!isAdded[user._id]) {
       addFriendHandler(user._id);
-      setIsAdded(prevState => ({ ...prevState, [user._id]: true }));
+      setIsAdded((prevState) => ({ ...prevState, [user._id]: true }));
     }
-  }
+  };
 
   useEffect(() => {
     const timeOutId = setTimeout(() => {
@@ -90,13 +94,15 @@ const Search = () => {
 
   return (
     <>
-    
-    <Tooltip title="Search Friends" arrow>
-    <div className='flex items-center'>
-    <SearchIcon fontSize='large' className='text-white cursor-pointer hover:text-gray-500' onClick={handleOpen} />
-    </div>
-    </Tooltip>
-       
+      <Tooltip title="Search Friends" arrow>
+        <div className="flex items-center">
+          <SearchIcon
+            fontSize="large"
+            className="text-white cursor-pointer hover:text-gray-500"
+            onClick={handleOpen}
+          />
+        </div>
+      </Tooltip>
 
       <Modal
         open={open}
@@ -105,34 +111,45 @@ const Search = () => {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <h1 className='text-3xl font-semibold text-center mb-3'>Find People</h1>
-          <input type='text' value={search.value} onChange={search.changeHandler} className='border w-full p-2 text-black rounded-lg' />
-          {
-            users && (
-              users.map((user) => (
-                <div key={user._id} className='flex justify-between items-center mt-4 p-3 border-b-[1px] border-gray-300'>
-                  <div className='flex gap-5 items-center text-lg'>
-                    <img src={user.avatar} alt='jf' className='h-12 w-12 rounded-full object-cover' />
-                    <h1>{user.name}</h1>
-                  </div>
-                  <div className='text-cyan-500 w-7 h-7 cursor-pointer' onClick={() => requestSentHandler(user)}>
-                    {
-                      isAdded[user._id] ? (
-                        <IoIosRemoveCircle className='text-red-700 w-7 h-7' />
-                      ) : (
-                        <IoIosAddCircle className='text-cyan-500 w-7 h-7' />
-                      )
-                    }
-                  </div>
+          <h1 className="text-3xl font-semibold text-center mb-3">
+            Find People
+          </h1>
+          <input
+            type="text"
+            value={search.value}
+            onChange={search.changeHandler}
+            className="border w-full p-2 text-black rounded-lg"
+          />
+          {users &&
+            users.map((user) => (
+              <div
+                key={user._id}
+                className="flex justify-between items-center mt-4 p-3 border-b-[1px] border-gray-300"
+              >
+                <div className="flex gap-5 items-center text-lg">
+                  <img
+                    src={user.avatar}
+                    alt="jf"
+                    className="h-12 w-12 rounded-full object-cover"
+                  />
+                  <h1>{user.name}</h1>
                 </div>
-              ))
-            )
-          }
+                <div
+                  className="text-cyan-500 w-7 h-7 cursor-pointer"
+                  onClick={() => requestSentHandler(user)}
+                >
+                  {isAdded[user._id] ? (
+                    <IoIosRemoveCircle className="text-red-700 w-7 h-7" />
+                  ) : (
+                    <IoIosAddCircle className="text-cyan-500 w-7 h-7" />
+                  )}
+                </div>
+              </div>
+            ))}
         </Box>
-
       </Modal>
     </>
-  )
-}
+  );
+};
 
 export default Search;
