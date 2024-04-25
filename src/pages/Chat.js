@@ -5,9 +5,15 @@ import { IoMdSend } from "react-icons/io";
 // import { SampleMessage } from "../utils/SampleMessage";
 import MessageComponent from "../components/MessageComponent";
 import { useSocket } from "../socket";
-import { CHAT_JOINED, CHAT_LEAVED, NEW_MESSAGE, START_TYPING, STOP_TYPING } from "../constants/events";
-import { useChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api";
-import { Skeleton } from "@mui/material";
+import {
+  CHAT_JOINED,
+  CHAT_LEAVED,
+  NEW_MESSAGE,
+  START_TYPING,
+  STOP_TYPING,
+} from "../constants/events";
+import { useChatDetailsQuery, useGetMessagesQuery, useMyChatsQuery } from "../redux/api/api";
+import { Skeleton, Tooltip } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useInfiniteScrollTop } from "6pp";
@@ -15,6 +21,10 @@ import FileMenu from "../components/FileMenu";
 import { setIsFileMenu } from "../redux/reducers/misc";
 import { removeNewMessagesAlert } from "../redux/reducers/chat";
 import { TypingLoader } from "../components/TypingLoader";
+import axios from "axios";
+import { server } from "../constants/config";
+import { toast } from "react-hot-toast";
+import { IoVideocamSharp } from "react-icons/io5";
 
 // const user = {
 //   _id : 'yooKiId',
@@ -30,12 +40,16 @@ const Chat = () => {
 
   // console.log('chatid',chatId)
 
+  // console.log("prop ka data = ",dataa)
+
   const containerRef = useRef(null);
   const dispatch = useDispatch();
 
   const socket = useSocket();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [name,setName] = useState("")
+  const[avatar,setAvatar] = useState("")
 
   const bottomRef = useRef(null);
 
@@ -49,17 +63,17 @@ const Chat = () => {
   // console.log(userTyping);
   // console.log('i am tyyping',IamTyping)
 
-  const[userChatId,setUserChatId] = useState(null)
+  const [userChatId, setUserChatId] = useState(null);
 
   const typingTimeout = useRef(null);
 
   const chatDetails = useChatDetailsQuery({ chatId, skip: !chatId });
 
-  console.log('chat details = ', chatDetails)
+  console.log("chat details = ", chatDetails);
 
   const members = chatDetails?.data?.chat?.members;
 
-  console.log(members)
+  console.log(members);
 
   const messageOnChange = (e) => {
     setMessage(e.target.value);
@@ -143,8 +157,8 @@ const Chat = () => {
 
   const startTypingListener = useCallback(
     (data) => {
-      setUserChatId(data.chatId)
-      console.log('data ki chatid = ',data.chatId)
+      setUserChatId(data.chatId);
+      console.log("data ki chatid = ", data.chatId);
       if (data.chatId !== chatId) return;
       console.log("start-typing", data);
       setUserTyping(true);
@@ -174,7 +188,6 @@ const Chat = () => {
     };
   }, [chatId]);
 
- 
   useEffect(() => {
     socket.emit(CHAT_JOINED, { userId: user._id, members });
     dispatch(removeNewMessagesAlert(chatId));
@@ -190,11 +203,41 @@ const Chat = () => {
 
   const sendMessage = () => {
     if (!message.trim()) return;
-  
+
     // Emitting the message to the server
     socket.emit(NEW_MESSAGE, { chatId, members, message });
     setMessage("");
   };
+
+  useEffect(()=>{
+   fetchData();
+  },[])
+ 
+  const fetchData = async () => {
+    try {
+      const { data } = await axios.get(`${server}/api/v1/chat/my`,{withCredentials : true});
+      console.log('fetched data = ', data);
+  
+      if (data.success) {
+         setName(data?.transformedChats[0]?.name)
+         setAvatar(data?.transformedChats[0]?.avatar)
+      }
+    } catch (error) {
+      console.error('An error occurred:', error);
+  
+      if (error.response && error.response.data) {
+        const { data } = error.response;
+        if (!data.success) {
+          console.error('Error:', data.error);
+        } else {
+          console.error('Error:', error.response.data);
+        }
+      } else {
+        console.error('Unknown error occurred:', error);
+      }
+    }
+  };
+  
 
 
   return chatDetails.isLoading ? (
@@ -203,19 +246,41 @@ const Chat = () => {
     <AppLayout>
       <div
         ref={containerRef}
-        className="flex flex-col h-[91vh] overflow-y-scroll bg-[url('https://images.unsplash.com/photo-1477840539360-4a1d23071046?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover object-cover"
+        className="flex flex-col h-[91vh] bg-[url('https://images.unsplash.com/photo-1477840539360-4a1d23071046?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover object-cover"
       >
-        <div className="flex-1 flex flex-col p-3 ">
+      <div className="p-3 bg-zinc-800 shadow-lg flex items-center justify-between">
+      <div className="flex items-center gap-4">
+            <img
+              src={avatar}
+              alt="dj"
+              className="w-12 h-12 object-cover rounded-full shadow-lg"
+            />
+
+            <h2 className="font-semibold text-lg text-white ">{name}</h2>
+          </div>
+         
+           <Tooltip title="Video Call" arrow>
+            <div>
+            <IoVideocamSharp className="text-gray-200 w-6 h-6 cursor-pointer mr-8"/>
+            </div>
+           </Tooltip>
+          
+
+        </div>
+        <div className="overflow-y-scroll  flex-1 flex flex-col p-3 ">
           {allMessages.map((msg) => (
             <MessageComponent message={msg} user={user} key={msg._id} />
           ))}
-           
+
           <div ref={bottomRef} />
         </div>
-        {userTyping  && <TypingLoader />}
+        {userTyping && <TypingLoader />}
         <div className="p-3 bg-gray-300">
           <form className="flex items-center" onSubmit={submitHandler}>
-            <CgAttachment className="w-8 h-8 mr-2 cursor-pointer" onClick={handleFileOpen} />
+            <CgAttachment
+              className="w-8 h-8 mr-2 cursor-pointer"
+              onClick={handleFileOpen}
+            />
             <input
               placeholder="Type some message here.."
               value={message}
@@ -223,8 +288,8 @@ const Chat = () => {
               className="flex-1 p-2 border border-gray-400 rounded-lg"
             />
             <button type="submit" className="ml-2" onClick={sendMessage}>
-            <IoMdSend className="w-8 h-8" />
-          </button>
+              <IoMdSend className="w-8 h-8" />
+            </button>
           </form>
           <FileMenu anchorE1={fileMenuAnchor} chatId={chatId} />
         </div>
