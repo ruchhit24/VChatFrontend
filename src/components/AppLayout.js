@@ -113,9 +113,7 @@ const AppLayout = (props) => {
     return (window.location.href = "/verify-email");
   }
 
-  const childrenWithProps = React.Children.map(props.children, child => {
-    return React.cloneElement(child, {data});
-  });
+ 
 
 
   return (
@@ -137,19 +135,7 @@ const AppLayout = (props) => {
           )}
         </div>
         <div className="col-span-6 bg-gray-200 h-[91vh]">{props.children}</div>
-        {/* <div className="col-span-6 bg-gray-200 h-[91vh]"> */}
-  {/* Passing props to the component rendered inside props.children */}
-  {/* {React.Children.map(props.children, child => {
-    // Check if the child component is Chat, then pass props to it
-    if (child.type.name === "Chat") {
-      return React.cloneElement(child, { dataa: data });
-    } else {
-      return child;
-    }
-  })} */}
- {/* </div> */}
-
- {/* <div className="col-span-6 bg-gray-200 h-[91vh]">{childrenWithProps}</div> */}
+    
         <div className="col-span-3 bg-zinc-800 h-[91vh]">
           <Profile />
         </div>

@@ -27,20 +27,36 @@ import { removeNewMessagesAlert } from "../redux/reducers/chat";
 import { TypingLoader } from "../components/TypingLoader";
 import axios from "axios";
 import { server } from "../constants/config";
-import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
-import { ZIM } from 'zego-zim-web';
+import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import { ZIM } from "zego-zim-web";
 import { IoVideocamSharp } from "react-icons/io5";
- 
+import VideoPlayer from "../components/VideoPlayer";
+import { Grid, Paper, Typography } from "@mui/material";
+import Peer from "simple-peer";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Modal from "@mui/material/Modal";
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 1000,
+  height: 600,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+};
 
 const Chat = () => {
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false); 
-  const [zp, setZp] = useState(null); // Zego UI Kit instance 
+  const [zp, setZp] = useState(null); // Zego UI Kit instance
 
+  const [show, setShow] = useState(false);
 
   const { user } = useSelector((state) => state.auth);
-   console.log('user from chttt= ',user)
+  console.log("user from chttt= ", user);
 
   const params = useParams();
   const { chatId } = params;
@@ -55,7 +71,7 @@ const Chat = () => {
   const socket = useSocket();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [name, setName] = useState("");
+  const [namee, setNamee] = useState("");
   const [avatar, setAvatar] = useState("");
 
   const bottomRef = useRef(null);
@@ -79,15 +95,12 @@ const Chat = () => {
   console.log("chat details = ", chatDetails);
 
   const fullNameOfBothUser = chatDetails?.data?.chat?.name;
-  const otherUserName = fullNameOfBothUser?.split(' - ')[1]; 
-  console.log('other user name = ',otherUserName)
+  const otherUserName = fullNameOfBothUser?.split(" - ")[1];
+  console.log("other user name = ", otherUserName);
 
   const members = chatDetails?.data?.chat?.members;
-  
- 
- 
 
-  console.log(" memebers of chtttt ",members);
+  console.log(" memebers of chtttt ", members);
 
   const messageOnChange = (e) => {
     setMessage(e.target.value);
@@ -224,7 +237,7 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    fetchData(); 
+    fetchData();
   }, []);
 
   const fetchData = async () => {
@@ -235,7 +248,7 @@ const Chat = () => {
       console.log("fetched data = ", data);
 
       if (data.success) {
-        setName(data?.transformedChats[0]?.name);
+        setNamee(data?.transformedChats[0]?.name);
         setAvatar(data?.transformedChats[0]?.avatar);
       }
     } catch (error) {
@@ -254,69 +267,186 @@ const Chat = () => {
     }
   };
 
-  useEffect(() => {
-    const initializeZego = async () => {
-      await initZego();
-    };
-  
-    initializeZego();
-  }, []);
-  
+  // useEffect(() => {
+  //   const initializeZego = async () => {
+  //     await initZego();
+  //   };
 
-  const initZego = async() => {
-    try {
-      
-         // Initialize Zego UI Kit with your SDK credentials
-      const userID = "34"
-      const userName = user.name;
-    console.log("userid = " + userID + "username =" ,userName)
-      // Check if members array is defined before accessing its elements
-      if (!userID) {
-        console.error('Members array is undefined or empty.');
-        return;
-      }
-  
-      const KitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
-        process.env.REACT_APP_ID,
-        process.env.REACT_APP_SERVER,
-        null,
-        userID,
-        userName
-      );
-      
-      const zpInstance = ZegoUIKitPrebuilt.create(KitToken);
-      zpInstance.addPlugins({ ZIM });
-  
-      console.log('Zego UI Kit initialized successfully:', zpInstance);
-      setZp(zpInstance);
-   
-    } catch (error) {
-      console.error('Error initializing Zego UI Kit:', error);
-    }
+  //   initializeZego();
+  // }, []);
+
+  // const initZego = async() => {
+  //   try {
+
+  //        // Initialize Zego UI Kit with your SDK credentials
+  //     const userID = "34"
+  //     const userName = user.name;
+  //   console.log("userid = " + userID + "username =" ,userName)
+  //     // Check if members array is defined before accessing its elements
+  //     if (!userID) {
+  //       console.error('Members array is undefined or empty.');
+  //       return;
+  //     }
+
+  //     const KitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
+  //       process.env.REACT_APP_ID,
+  //       process.env.REACT_APP_SERVERR,
+  //       null,
+  //       userID,
+  //       userName
+  //     );
+
+  //     const zpInstance = ZegoUIKitPrebuilt.create(KitToken);
+  //     zpInstance.addPlugins({ ZIM });
+
+  //     console.log('Zego UI Kit initialized successfully:', zpInstance);
+  //     setZp(zpInstance);
+
+  //   } catch (error) {
+  //     console.error('Error initializing Zego UI Kit:', error);
+  //   }
+  // };
+
+  // const handleVideoCall = () => {
+  //   if (!zp) {
+  //     console.error('Zego UI Kit is not initialized.');
+  //     return;
+  //   }
+
+  //   const calleeID = members[1]; // Replace with your friend's user ID
+  //   const calleeName =otherUserName   // Replace with your friend's user name
+
+  //   zp.sendCallInvitation({
+  //     callees: [{ userID: calleeID, userName: calleeName }],
+  //     callType: ZegoUIKitPrebuilt.InvitationTypeVideoCall,
+  //     timeout: 60,
+  //   }).then((res) => {
+  //     console.warn(res);
+  //     if (res.errorInvitees.length) {
+  //       alert('The user does not exist or is offline.');
+  //     }
+  //   }).catch((err) => {
+  //     console.error(err);
+  //   });
+  // };
+
+  // video call
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => {
+    setOpen(true);
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then((currentStream) => {
+        setStream(currentStream);
+        if (myVideo.current) {
+                  myVideo.current.srcObject = currentStream;
+                }
+        
+      })
+      .catch((err) => console.error('Error accessing camera:', err));
+          socket.on("me", (id) => setMe(id));
+
+    socket.on("callUser", ({ from, name: callerName, signal }) => {
+      setCall({ isReceivingCall: true, from, name: callerName, signal });
+  })
+}
+   // Function to handle modal close event
+   const handleClose = () => {
+    setOpen(false);
+    setCallEnded(true); // Set callEnded to true to indicate call end
+    stopVideoStream(); // Stop the video stream
   };
-  
-
-  const handleVideoCall = () => {
-    if (!zp) {
-      console.error('Zego UI Kit is not initialized.');
-      return;
-    }
-
-    const calleeID = members[1]; // Replace with your friend's user ID
-    const calleeName =otherUserName   // Replace with your friend's user name
-
-    zp.sendCallInvitation({
-      callees: [{ userID: calleeID, userName: calleeName }],
-      callType: ZegoUIKitPrebuilt.InvitationTypeVideoCall,
-      timeout: 60,
-    }).then((res) => {
-      console.warn(res);
-      if (res.errorInvitees.length) {
-        alert('The user does not exist or is offline.');
+    // Function to stop the video stream
+    const stopVideoStream = () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => {
+          track.stop();
+        });
       }
-    }).catch((err) => {
-      console.error(err);
+    };
+
+  const [callAccepted, setCallAccepted] = useState(false);
+  const [callEnded, setCallEnded] = useState(false);
+  const [stream, setStream] = useState();
+  const [call, setCall] = useState({});
+  const [me, setMe] = useState("");
+  const [name, setName] = useState("");
+
+  const myVideo = useRef();
+  const userVideo = useRef();
+  const connectionRef = useRef();
+
+  // useEffect(() => {
+  //   navigator.mediaDevices
+  //     .getUserMedia({ video: true, audio: true })
+  //     .then((currentStream) => {
+  //       setStream(currentStream);
+
+  //       if (myVideo.current) {
+  //         myVideo.current.srcObject = currentStream;
+  //       }
+  //     });
+
+  //   socket.on("me", (id) => setMe(id));
+
+  //   socket.on("callUser", ({ from, name: callerName, signal }) => {
+  //     setCall({ isReceivingCall: true, from, name: callerName, signal });
+  //   });
+  //   return () => {
+  //     if (stream) {
+  //       stream.getTracks().forEach(track => track.stop());
+  //     }
+  //   };
+  // }, []);
+
+  const answerCall = () => {
+    setCallAccepted(true);
+
+    const peer = new Peer({ initiator: false, trickle: false, stream });
+
+    peer.on("signal", (data) => {
+      socket.emit("answerCall", { signal: data, to: call.from });
     });
+
+    peer.on("stream", (currentStream) => {
+      userVideo.current.srcObject = currentStream;
+    });
+
+    peer.signal(call.signal);
+
+    connectionRef.current = peer;
+  };
+
+  const callUser = (id) => {
+    const peer = new Peer({ initiator: true, trickle: false, stream });
+
+    peer.on("signal", (data) => {
+      socket.emit("callUser", {
+        userToCall: id,
+        signalData: data,
+        from: me,
+        name,
+      });
+    });
+
+    peer.on("stream", (currentStream) => {
+      userVideo.current.srcObject = currentStream;
+    });
+
+    socket.on("callAccepted", (signal) => {
+      setCallAccepted(true);
+
+      peer.signal(signal);
+    });
+
+    connectionRef.current = peer;
+  };
+
+  const leaveCall = () => {
+    setCallEnded(true);
+
+    connectionRef.current.destroy();
+
+    window.location.reload();
   };
 
   return chatDetails.isLoading ? (
@@ -337,15 +467,20 @@ const Chat = () => {
 
             <h2 className="font-semibold text-lg text-white ">{name}</h2>
           </div>
-           
-          <div> {/* Added a div to wrap the icon */}
-    <Tooltip title="Video Call" arrow>
-      <div onClick={handleVideoCall} className="text-gray-200 w-6 h-6 cursor-pointer mr-8">
-        <IoVideocamSharp />
-      </div>
-    </Tooltip>
-  </div>
-           
+
+          <div>
+            {" "}
+            {/* Added a div to wrap the icon */}
+            <Tooltip title="Video Call" arrow>
+              <div
+                onClick={handleOpen}
+                className="text-gray-200 w-6 h-6 cursor-pointer mr-8"
+              >
+                <IoVideocamSharp />
+              </div>
+            </Tooltip>
+          </div>
+          {show && <VideoPlayer />}
         </div>
         <div className="overflow-y-scroll  flex-1 flex flex-col p-3 ">
           {allMessages.map((msg) => (
@@ -374,9 +509,45 @@ const Chat = () => {
           <FileMenu anchorE1={fileMenuAnchor} chatId={chatId} />
         </div>
       </div>
-      <div>
-   
-    </div>
+      <div></div>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-center">
+            {stream && (
+              <div className="border-2 border-black p-4">
+                <Typography variant="h5" gutterBottom>
+                  {name || "You"}
+                </Typography>
+                <video
+                  playsInline
+                  muted
+                  ref={myVideo}
+                  autoPlay
+                  className="w-full md:w-550px"
+                />
+              </div>
+            )}
+            {callAccepted && !callEnded && (
+              <div className="border-2 border-black p-4">
+                <Typography variant="h5" gutterBottom>
+                  {call.name || "Other User"}
+                </Typography>
+                <video
+                  playsInline
+                  ref={userVideo}
+                  autoPlay
+                  className="w-full md:w-550px"
+                />
+              </div>
+            )}
+          </div>
+        </Box>
+      </Modal>
     </AppLayout>
   );
 };
