@@ -20,7 +20,7 @@ const MessageComponent = ({ message, user }) => {
   const { newMessagesAlert } = useSelector((state) => state.chat);
 
   const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
-  console.log('user ka data in message compo = ',data)
+  // console.log('user ka data in message compo = ',data)
 
   return (
     <motion.div

@@ -12,28 +12,35 @@ import {
   START_TYPING,
   STOP_TYPING,
 } from "../constants/events";
-import { useChatDetailsQuery, useGetMessagesQuery, useMyChatsQuery } from "../redux/api/api";
+import {
+  useChatDetailsQuery,
+  useGetMessagesQuery,
+  useMyChatsQuery,
+} from "../redux/api/api";
 import { Skeleton, Tooltip } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useInfiniteScrollTop } from "6pp";
+import { isValidUsername, useInfiniteScrollTop } from "6pp";
 import FileMenu from "../components/FileMenu";
 import { setIsFileMenu } from "../redux/reducers/misc";
 import { removeNewMessagesAlert } from "../redux/reducers/chat";
 import { TypingLoader } from "../components/TypingLoader";
 import axios from "axios";
 import { server } from "../constants/config";
-import { toast } from "react-hot-toast";
+import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
+import { ZIM } from 'zego-zim-web';
 import { IoVideocamSharp } from "react-icons/io5";
-
-// const user = {
-//   _id : 'yooKiId',
-//   name : 'yoo',
-// }
+ 
 
 const Chat = () => {
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false); 
+  const [zp, setZp] = useState(null); // Zego UI Kit instance 
+
+
   const { user } = useSelector((state) => state.auth);
-  //  console.log('user= ',user)
+   console.log('user from chttt= ',user)
 
   const params = useParams();
   const { chatId } = params;
@@ -48,8 +55,8 @@ const Chat = () => {
   const socket = useSocket();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [name,setName] = useState("")
-  const[avatar,setAvatar] = useState("")
+  const [name, setName] = useState("");
+  const [avatar, setAvatar] = useState("");
 
   const bottomRef = useRef(null);
 
@@ -71,9 +78,16 @@ const Chat = () => {
 
   console.log("chat details = ", chatDetails);
 
-  const members = chatDetails?.data?.chat?.members;
+  const fullNameOfBothUser = chatDetails?.data?.chat?.name;
+  const otherUserName = fullNameOfBothUser?.split(' - ')[1]; 
+  console.log('other user name = ',otherUserName)
 
-  console.log(members);
+  const members = chatDetails?.data?.chat?.members;
+  
+ 
+ 
+
+  console.log(" memebers of chtttt ",members);
 
   const messageOnChange = (e) => {
     setMessage(e.target.value);
@@ -209,36 +223,101 @@ const Chat = () => {
     setMessage("");
   };
 
-  useEffect(()=>{
-   fetchData();
-  },[])
- 
+  useEffect(() => {
+    fetchData(); 
+  }, []);
+
   const fetchData = async () => {
     try {
-      const { data } = await axios.get(`${server}/api/v1/chat/my`,{withCredentials : true});
-      console.log('fetched data = ', data);
-  
+      const { data } = await axios.get(`${server}/api/v1/chat/my`, {
+        withCredentials: true,
+      });
+      console.log("fetched data = ", data);
+
       if (data.success) {
-         setName(data?.transformedChats[0]?.name)
-         setAvatar(data?.transformedChats[0]?.avatar)
+        setName(data?.transformedChats[0]?.name);
+        setAvatar(data?.transformedChats[0]?.avatar);
       }
     } catch (error) {
-      console.error('An error occurred:', error);
-  
+      console.error("An error occurred:", error);
+
       if (error.response && error.response.data) {
         const { data } = error.response;
         if (!data.success) {
-          console.error('Error:', data.error);
+          console.error("Error:", data.error);
         } else {
-          console.error('Error:', error.response.data);
+          console.error("Error:", error.response.data);
         }
       } else {
-        console.error('Unknown error occurred:', error);
+        console.error("Unknown error occurred:", error);
       }
+    }
+  };
+
+  useEffect(() => {
+    const initializeZego = async () => {
+      await initZego();
+    };
+  
+    initializeZego();
+  }, []);
+  
+
+  const initZego = async() => {
+    try {
+      
+         // Initialize Zego UI Kit with your SDK credentials
+      const userID = "34"
+      const userName = user.name;
+    console.log("userid = " + userID + "username =" ,userName)
+      // Check if members array is defined before accessing its elements
+      if (!userID) {
+        console.error('Members array is undefined or empty.');
+        return;
+      }
+  
+      const KitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
+        process.env.REACT_APP_ID,
+        process.env.REACT_APP_SERVER,
+        null,
+        userID,
+        userName
+      );
+      
+      const zpInstance = ZegoUIKitPrebuilt.create(KitToken);
+      zpInstance.addPlugins({ ZIM });
+  
+      console.log('Zego UI Kit initialized successfully:', zpInstance);
+      setZp(zpInstance);
+   
+    } catch (error) {
+      console.error('Error initializing Zego UI Kit:', error);
     }
   };
   
 
+  const handleVideoCall = () => {
+    if (!zp) {
+      console.error('Zego UI Kit is not initialized.');
+      return;
+    }
+
+    const calleeID = members[1]; // Replace with your friend's user ID
+    const calleeName =otherUserName   // Replace with your friend's user name
+
+    zp.sendCallInvitation({
+      callees: [{ userID: calleeID, userName: calleeName }],
+      callType: ZegoUIKitPrebuilt.InvitationTypeVideoCall,
+      timeout: 60,
+    }).then((res) => {
+      console.warn(res);
+      if (res.errorInvitees.length) {
+        alert('The user does not exist or is offline.');
+      }
+    }).catch((err) => {
+      console.error(err);
+    });
+  };
 
   return chatDetails.isLoading ? (
     <Skeleton />
@@ -248,8 +327,8 @@ const Chat = () => {
         ref={containerRef}
         className="flex flex-col h-[91vh] bg-[url('https://images.unsplash.com/photo-1477840539360-4a1d23071046?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover object-cover"
       >
-      <div className="p-3 bg-zinc-800 shadow-lg flex items-center justify-between">
-      <div className="flex items-center gap-4">
+        <div className="p-3 bg-zinc-800 shadow-lg flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <img
               src={avatar}
               alt="dj"
@@ -258,14 +337,15 @@ const Chat = () => {
 
             <h2 className="font-semibold text-lg text-white ">{name}</h2>
           </div>
-         
-           <Tooltip title="Video Call" arrow>
-            <div>
-            <IoVideocamSharp className="text-gray-200 w-6 h-6 cursor-pointer mr-8"/>
-            </div>
-           </Tooltip>
-          
-
+           
+          <div> {/* Added a div to wrap the icon */}
+    <Tooltip title="Video Call" arrow>
+      <div onClick={handleVideoCall} className="text-gray-200 w-6 h-6 cursor-pointer mr-8">
+        <IoVideocamSharp />
+      </div>
+    </Tooltip>
+  </div>
+           
         </div>
         <div className="overflow-y-scroll  flex-1 flex flex-col p-3 ">
           {allMessages.map((msg) => (
@@ -294,6 +374,9 @@ const Chat = () => {
           <FileMenu anchorE1={fileMenuAnchor} chatId={chatId} />
         </div>
       </div>
+      <div>
+   
+    </div>
     </AppLayout>
   );
 };

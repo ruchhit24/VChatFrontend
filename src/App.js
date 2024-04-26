@@ -19,6 +19,7 @@ import Box from "@mui/material/Box";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import Notifications from "./pages/Notifications";
+import VideoCall from "./pages/VideoCall";
 
 // let user = true;
 
@@ -95,6 +96,16 @@ const App = () => {
                 {" "}
                 {/* Redirect user to VerifyEmail if not verified */}
                 <ResetPassword />
+              </PrivateRoute>
+            }
+          />
+           <Route
+            path="/video-call"
+            element={
+              <PrivateRoute user={user} redirect="/video-call">
+                {" "}
+                {/* Redirect user to VerifyEmail if not verified */}
+                <VideoCall />
               </PrivateRoute>
             }
           />
