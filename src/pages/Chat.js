@@ -428,7 +428,10 @@ console.log('other user socket id = ',otherUserSocketId );
     console.log("acceptd call");
 
     peer.on("stream", (currentStream) => {
-      userVideo.current.srcObject = currentStream;
+       if(userVideo.current)
+       {
+        userVideo.current.srcObject = currentStream;
+       }
     });
 
     peer.signal(call.signal);
