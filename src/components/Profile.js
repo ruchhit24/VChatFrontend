@@ -1,11 +1,29 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { GrAd } from "react-icons/gr";
 import { FaRegUserCircle } from "react-icons/fa";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import moment from "moment";
 import { useSelector } from "react-redux";
+import { useSocket } from "../socket";
+import { NEW_VIDEO_REQUEST } from "../constants/events";
+
 
 const Profile = () => {
+  const socket = useSocket();
+  const [videoCall,setVideoCall]=useState(false)
+  let VideoCall = true
+  const videoRequestListener = useCallback((data) => {
+    console.log("video call ka dataaaaaaaa==", data);
+    // setOnlineUsers(data);
+  }, []);
+  useEffect(() => {
+    socket.on(NEW_VIDEO_REQUEST, videoRequestListener);
+    setVideoCall(true)
+    return () => {
+      socket.off(NEW_VIDEO_REQUEST, videoRequestListener);
+      setVideoCall(false)
+    };
+  }, []);
   const { user } = useSelector((state) => state.auth);
   return (
     <div className="flex justify-center items-center mt-20">
@@ -35,6 +53,13 @@ const Profile = () => {
         </div>
 
         <span className="text-center text-gray-500 ">Joined</span>
+        {/* {
+          videoCall && (
+            <div className="w-80 h-20 bg-white text black">
+              ruchit is calling you..
+            </div>
+          )
+        } */}
       </div>
     </div>
   );

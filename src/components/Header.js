@@ -17,10 +17,7 @@ import {
 } from "../redux/reducers/misc";
 import { resetNotificationCount } from "../redux/reducers/chat";
 import { Badge, Tooltip } from "@mui/material";
-import {
-  Add as AddIcon,
-  Menu as MenuIcon,
-  Search as SearchIcon,
+import { 
   Group as GroupIcon,
   Logout as LogoutIcon,
   Notifications as NotificationsIcon,

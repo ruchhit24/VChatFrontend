@@ -43,7 +43,7 @@ const Search = () => {
   // console.log('data',data)
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState(SampleUser);
-  console.log('users = ', users)
+  // console.log('users = ', users)
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);

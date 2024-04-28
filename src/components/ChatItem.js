@@ -14,7 +14,7 @@ const ChatItem = ({
   handleDeleteChat,
 }) => {
   // console.log(isOnline)
-  console.log('new message= ',newMessageAlert)
+  // console.log('new message= ',newMessageAlert)
   return (
     <Link
       to={`/chat/${_id}`}

@@ -21,9 +21,12 @@ import {
 import { setIsDeleteMenu, setSelectedDeleteChat } from "../redux/reducers/misc";
 import { saveToLocalStorage } from "../lib/Features";
 import DeleteChatMenu from "./DeleteChatMenu";
+import VideoPlayer from "./VideoPlayer"
 
 const AppLayout = (props) => {
   // Removed the higher-order component wrapper
+
+  const isVideo = useSelector((state) => state.misc.isVideo);
 
   const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
 
@@ -39,7 +42,7 @@ const AppLayout = (props) => {
   const isVerified = useSelector((state) => state.auth.user?.isVerified);
 
   // console.log('chatid',chatId)
-  console.log('data = ',data)
+  // console.log('data = ',data)
 
   const socket = useSocket();
   // console.log('socket',socket)
@@ -99,7 +102,7 @@ const AppLayout = (props) => {
   }, [refetch]);
 
   const onlineUsersListener = useCallback((data) => {
-    console.log("applayout ka dataaaaaaaa==", data);
+    // console.log("applayout ka dataaaaaaaa==", data);
     setOnlineUsers(data);
   }, []);
   useEffect(() => {
@@ -113,15 +116,15 @@ const AppLayout = (props) => {
     return (window.location.href = "/verify-email");
   }
 
- 
-
 
   return (
     <div className="w-full min-h-screen relative">
       <Header />
       <DeleteChatMenu dispatch={dispatch} deleteMenuAnchor={deleteMenuAnchor} />
       <div className="grid grid-cols-12 h-[91vh]">
-        <div className="col-span-3 overflow-y-scroll h-[91vh]">
+     {isVideo ? (<VideoPlayer/>) : (
+      <>
+      <div className="col-span-3 overflow-y-scroll h-[91vh]">
           {isLoading ? (
             <Skeleton />
           ) : (
@@ -139,6 +142,8 @@ const AppLayout = (props) => {
         <div className="col-span-3 bg-zinc-800 h-[91vh]">
           <Profile />
         </div>
+      </>
+     )}
       </div>
     </div>
   );

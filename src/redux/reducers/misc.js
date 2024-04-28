@@ -9,6 +9,7 @@ const initialState = {
   isFileMenu: false,
   isDeleteMenu: false,
   uploadingLoader: false,
+  isVideo:false,
   selectedDeleteChat: {
     chatId: "",
     groupChat: false,
@@ -45,6 +46,10 @@ const miscSlice = createSlice({
     setSelectedDeleteChat: (state, action) => {
       state.selectedDeleteChat = action.payload;
     },
+     // New reducer for toggling isVideo state
+     toggleIsVideo: (state, action) => {
+      state.isVideo = action.payload;
+    },
   },
 });
 
@@ -59,4 +64,5 @@ export const {
   setIsDeleteMenu,
   setUploadingLoader,
   setSelectedDeleteChat,
+  toggleIsVideo, 
 } = miscSlice.actions;

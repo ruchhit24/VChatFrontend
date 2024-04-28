@@ -17,6 +17,8 @@ const ONLINE_USERS = "ONLINE_USERS";
 
 const friendRequestAccepted = "friendRequestAccepted"
 
+const NEW_VIDEO_REQUEST = "NEW_VIDEO_REQUEST"
+
 export {
   ALERT,
   REFETCH_CHATS,
@@ -29,5 +31,6 @@ export {
   CHAT_JOINED,
   CHAT_LEAVED,
   ONLINE_USERS,
-  friendRequestAccepted
+  friendRequestAccepted,
+  NEW_VIDEO_REQUEST
 };
