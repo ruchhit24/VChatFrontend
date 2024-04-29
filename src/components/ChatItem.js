@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const ChatItem = ({
@@ -12,7 +12,7 @@ const ChatItem = ({
   newMessageAlert,
   index = 0,
   handleDeleteChat,
-}) => {
+}) => { 
   // console.log(isOnline)
   // console.log('new message= ',newMessageAlert)
   return (
@@ -21,13 +21,14 @@ const ChatItem = ({
       onContextMenu={(e) => handleDeleteChat(e, _id, groupChat)}
     >
       <motion.div
-        initial={{ opacity: 0, y: "-100%" }}
-        whileInView={{ opacity: 1, y: 0 }}
-        className="p-3 border-b-[1px] border-gray-400 flex items-center justify-between gap-3 hover:bg-gray-300 relative"
-        style={{
-          backgroundColor: sameSender ? "black" : "unset",
-          color: sameSender ? "white" : "unset",
-        }}
+            initial={{ opacity: 0, y: "-100%" }}
+    whileInView={{ opacity: 1, y: 0 }}
+    className="p-3 border-b-[1px] border-gray-400 flex items-center justify-between gap-3 hover:bg-gray-300 relative"
+    style={{
+      backgroundColor: sameSender ? "black" : "unset",
+      color: sameSender ? "white" : "unset",
+    }}
+ 
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

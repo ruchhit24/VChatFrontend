@@ -5,8 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import  { HelmetProvider } from 'react-helmet-async'
 import { Provider } from "react-redux";
-import store from './redux/store';
-import { SocketProvider } from './socket';
+import store from './redux/store'; 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -14,9 +13,8 @@ root.render(
   <Provider store={store}>
   <HelmetProvider>
   <div onContextMenu={(e) => e.preventDefault()}>
-          <SocketProvider>
-          <App />
-          </SocketProvider>
+          
+          <App /> 
         </div>
     </HelmetProvider>
   </Provider>

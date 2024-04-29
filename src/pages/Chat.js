@@ -317,17 +317,17 @@ const Chat = () => {
     // Ensure camera access is activated when the modal is opened
     setCameraActive(true);
   };
-  useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((currentStream) => {
-        setStream(currentStream);
-        console.log("current stream =", currentStream);
-        if (myVideo.current) {
-          myVideo.current.srcObject = currentStream;
-        }
-      });
-  }, [open]);
+  // useEffect(() => {
+  //   navigator.mediaDevices
+  //     .getUserMedia({ video: true, audio: true })
+  //     .then((currentStream) => {
+  //       setStream(currentStream);
+  //       console.log("current stream =", currentStream);
+  //       if (myVideo.current) {
+  //         myVideo.current.srcObject = currentStream;
+  //       }
+  //     });
+  // }, [open]);
   // useEffect(() => {
   //   // Ensure camera access is only requested when the modal is open and camera is active
   //   if (open && cameraActive) {

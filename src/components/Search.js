@@ -19,6 +19,7 @@ import {
   Logout as LogoutIcon,
   Notifications as NotificationsIcon,
 } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const style = {
   position: "absolute",
@@ -49,6 +50,8 @@ const Search = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const navigate = useNavigate()
+
   const [isAdded, setIsAdded] = useState({});
 
   const [sendFriendRequest] = useSendFriendRequestMutation();
@@ -74,6 +77,8 @@ const Search = () => {
   };
 
   const requestSentHandler = (user) => {
+    handleClose()
+    
     if (!isAdded[user._id]) {
       addFriendHandler(user._id);
       setIsAdded((prevState) => ({ ...prevState, [user._id]: true }));

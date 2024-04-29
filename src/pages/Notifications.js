@@ -4,11 +4,13 @@ import { toast } from "react-hot-toast";
 import { IoMdArrowBack } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { TiTick } from "react-icons/ti";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   useAcceptFriendRequestMutation,
   useGetNotificationsQuery,
 } from "../redux/api/api";
+import { setIsNotification } from "../redux/reducers/misc";
+import { useDispatch } from "react-redux";
 
 const style = {
   position: "absolute",
@@ -24,21 +26,23 @@ const style = {
 
 const Notifications = () => {
  
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { isLoading, data, error, isError } = useGetNotificationsQuery();
   console.log("notification ka data = ", data);
 
   const [acceptRequest] = useAcceptFriendRequestMutation();
 
-  const friendRequestHandler = async ({ idd, accept }) => {
-    // dispatch(setIsNotification(false));
-    window.location.href = "/";
+  const friendRequestHandler = async ({id,accept}) => {
+    dispatch(setIsNotification(false));
+     
     try {
-      const res = await acceptRequest({ requestId: idd, accept });
+      const res = await acceptRequest({ requestId: id, accept });
       console.log("res= ", res);
       if (res.data?.success) {
         // console.log("we need to use sockets here");
         toast.success(res.data.message);
+        navigate("/")
       } else {
         toast.error(res.error.data.message || "Something went wrong");
       }
@@ -85,13 +89,13 @@ const Notifications = () => {
                   <TiTick
                     className="h-10 w-10 text-green-700 cursor-pointer hover:scale-110 duration-700"
                     onClick={() =>
-                      friendRequestHandler({ idd: x._id, accept: true })
+                      friendRequestHandler({id : x._id,accept : true})
                     }
                   />
                   <RxCross2
                     className="h-10 w-10 text-red-600 cursor-pointer hover:scale-110 duration-700"
                     onClick={() =>
-                      friendRequestHandler({ idd: x._id, accept: false })
+                      friendRequestHandler({id : x._id, accept : false})
                     }
                   />
                 </div>

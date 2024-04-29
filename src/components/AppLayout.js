@@ -22,8 +22,11 @@ import { setIsDeleteMenu, setSelectedDeleteChat } from "../redux/reducers/misc";
 import { saveToLocalStorage } from "../lib/Features";
 import DeleteChatMenu from "./DeleteChatMenu";
 import VideoPlayer from "./VideoPlayer"
+import { useSocketEvents } from "../constants/hooks";
 
 const AppLayout = (props) => {
+
+ 
   // Removed the higher-order component wrapper
 
   const isVideo = useSelector((state) => state.misc.isVideo);
@@ -42,7 +45,7 @@ const AppLayout = (props) => {
   const isVerified = useSelector((state) => state.auth.user?.isVerified);
 
   // console.log('chatid',chatId)
-  // console.log('data = ',data)
+  console.log('data = ',data)
 
   const socket = useSocket();
   // console.log('socket',socket)
@@ -65,52 +68,37 @@ const AppLayout = (props) => {
   const newRequestListener = useCallback(() => {
     dispatch(incrementNotification());
   }, [dispatch]);
-
-  useEffect(() => {
-    socket.on(NEW_REQUEST, newRequestListener);
-    return () => {
-      socket.off(NEW_REQUEST, newRequestListener);
-    };
-  }, [newRequestListener]);
+ 
 
   const newMessageAlertListener = useCallback(
     (data) => {
       if (data.chatId === chatId) return;
       dispatch(setNewMessagesAlert(data));
-    },
-    [chatId]
-  );
-  useEffect(() => {
-    socket.on(NEW_MESSAGE_ALERT, newMessageAlertListener);
-    return () => {
-      socket.off(NEW_MESSAGE_ALERT, newMessageAlertListener);
-    };
-  }, [chatId]);
+    },[chatId]);
+ 
 
   useEffect(() => {
     saveToLocalStorage({ key: NEW_MESSAGE_ALERT, value: newMessagesAlert });
   }, [newMessagesAlert]);
 
   const refetchListener = useCallback(() => {
-    refetch();
+    refetch(); 
   }, [refetch]);
-  useEffect(() => {
-    socket.on(REFETCH_CHATS, refetchListener);
-    return () => {
-      socket.off(REFETCH_CHATS, refetchListener);
-    };
-  }, [refetch]);
-
+   
   const onlineUsersListener = useCallback((data) => {
     // console.log("applayout ka dataaaaaaaa==", data);
     setOnlineUsers(data);
   }, []);
-  useEffect(() => {
-    socket.on(ONLINE_USERS, onlineUsersListener);
-    return () => {
-      socket.off(ONLINE_USERS, onlineUsersListener);
-    };
-  }, []);
+ 
+
+  const eventHandlers = {
+    [NEW_MESSAGE_ALERT]: newMessageAlertListener,
+    [NEW_REQUEST]: newRequestListener,
+    [REFETCH_CHATS]: refetchListener,
+    [ONLINE_USERS]: onlineUsersListener,
+  };
+
+  useSocketEvents(socket, eventHandlers);
 
   if (!isVerified) {
     return (window.location.href = "/verify-email");
@@ -133,7 +121,7 @@ const AppLayout = (props) => {
               chatId={chatId}
               handleDeleteChat={handleDeleteChat}
               newMessagesAlert={newMessagesAlert}
-              // onlineUsers={onlineUsers}
+              onlineUsers={onlineUsers}
             />
           )}
         </div>
