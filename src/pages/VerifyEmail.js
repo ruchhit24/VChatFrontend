@@ -5,7 +5,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { server } from "../constants/config";
 import { toast } from "react-hot-toast";
-import { Redirect } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
 import { PiSignOutBold } from "react-icons/pi";
 import { userNotExists } from "../redux/reducers/auth";
 
@@ -18,14 +18,14 @@ const VerifyEmail = () => {
 //   }
 
 const dispatch = useDispatch();
-
+const navigate = useNavigate()
   const handleVerify = async () => {
     try {
       const response = await axios.post(`${server}/api/v1/user/verify-email`,{ userId, otp });
       if (response.data.success) {
         // Redirect to home page upon successful verification
         toast.success(response.data.message);
-        window.location.href = "/";
+        navigate("/")
       } else {
         alert(response.data.message);
       }
@@ -42,7 +42,7 @@ const dispatch = useDispatch();
       });
       dispatch(userNotExists());
       toast.success(data.message);
-      window.location.href = "/login";
+      navigate("/login")
     } catch (error) {
       toast.error(error?.response?.data?.message || "Something went wrong");
     }
