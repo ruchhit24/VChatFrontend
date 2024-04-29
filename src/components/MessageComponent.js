@@ -9,8 +9,8 @@ import { useSelector } from "react-redux";
 import { useMyChatsQuery } from "../redux/api/api";
 
 const MessageComponent = ({ message, user }) => {
-  // console.log('message',message)
-  const { sender, content, attachments = [], createdAt } = message;
+  console.log('message',message)
+  const { sender, content, attachments = [], createdAt } = message; 
   const sameSender = sender?._id === user?._id;
   // console.log(sender._id,user._id)
   const messageClass = sameSender ? "self-end" : "self-start";
@@ -29,9 +29,12 @@ const MessageComponent = ({ message, user }) => {
       className={`${messageClass} pr-8 pl-2 py-2 rounded-tl-xl rounded-bl-xl rounded-br-xl bg-gray-300 mt-2`}
     >
        <div className="w-full mx-2">
+       <div className="flex items-center gap-2">
+       {/* { !sameSender && <img src={sender?.avatar?.url} alt="img" className="w-5 h-5 object-cover rounded-full "/>} */}
        {!sameSender && <h2 className="capitalize font-bold">{sender.name}</h2>}
+       </div>
       {sameSender && <h2 className="capitalize font-bold">You</h2>}
-      {content && <div>{content}</div>}
+      {content && <div className="text-md tracking-tight leading-5">{content}</div>}
       {attachments.length > 0 &&
         attachments.map((attachement, index) => {
           const url = attachement.url;

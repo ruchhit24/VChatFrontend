@@ -48,7 +48,7 @@ const ChatItem = ({
             </h2>
           </div>
         )}
-        {isOnline && (
+        {isOnline && !groupChat && (
           <div className="h-2 w-2 rounded-full bg-green-800 absolute top-1/2 right-4" />
         )}
       </motion.div>

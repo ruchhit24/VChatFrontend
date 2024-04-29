@@ -33,6 +33,8 @@ const AppLayout = (props) => {
 
   const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
 
+  // console.log("chat list me jo data jane wla h = ",data)
+
   const [onlineUsers, setOnlineUsers] = useState([]);
   // console.log('online users applayout = ',onlineUsers)
 
@@ -45,7 +47,7 @@ const AppLayout = (props) => {
   const isVerified = useSelector((state) => state.auth.user?.isVerified);
 
   // console.log('chatid',chatId)
-  console.log('data = ',data)
+  // console.log('data = ',data)
 
   const socket = useSocket();
   // console.log('socket',socket)

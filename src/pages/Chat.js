@@ -18,7 +18,7 @@ import {
   useMyChatsQuery,
 } from "../redux/api/api";
 import { Skeleton, TextField, Tooltip } from "@mui/material";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { isValidUsername, useInfiniteScrollTop } from "6pp";
 import FileMenu from "../components/FileMenu";
@@ -38,6 +38,7 @@ import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import { Phone, PhoneDisabled } from "@mui/icons-material";
 import { toast } from "react-hot-toast"; 
+import ChatHeader from "../components/ChatHeader";
 
 const style = {
   position: "absolute",
@@ -181,7 +182,7 @@ const Chat = () => {
   );
 
   // console.log('old messages',data);
-
+ 
   const allMessages = [...data, ...messages];
 
   const [fileMenuAnchor, setFileMenuAnchor] = useState(null);
@@ -265,11 +266,15 @@ const Chat = () => {
       const { data } = await axios.get(`${server}/api/v1/chat/my`, {
         withCredentials: true,
       });
-      // console.log("fetched data = ", data);
+      console.log("fetched data = ", data);
 
       if (data.success) {
-        setNamee(data?.transformedChats[0]?.name);
-        setAvatar(data?.transformedChats[0]?.avatar);
+        const other = data.transformedChats.filter((val)=>{
+          return val._id === chatId
+        })
+        console.log("other = ", other)
+        setNamee(other[0].name);
+        setAvatar(other[0].avatar);
       }
     } catch (error) {
       // console.error("An error occurred:", error);
@@ -287,6 +292,9 @@ const Chat = () => {
     }
   };
 
+  // const allFinalMessages = [ ...data, ...messages, namee , avatar]
+
+  // console.log("all final messags = ", allFinalMessages)
   // video call
   const [open, setOpen] = useState(false);
   const [me, setMe] = useState("");
@@ -316,6 +324,7 @@ const Chat = () => {
     setOpen(true);
     // Ensure camera access is activated when the modal is opened
     setCameraActive(true);
+    setCamera()
   };
   // useEffect(() => {
   //   navigator.mediaDevices
@@ -328,6 +337,19 @@ const Chat = () => {
   //       }
   //     });
   // }, [open]);
+
+
+ const setCamera = ()=>{
+  navigator.mediaDevices
+  .getUserMedia({ video: true, audio: true })
+  .then((currentStream) => {
+    setStream(currentStream);
+    console.log("current stream =", currentStream);
+    if (myVideo.current) {
+      myVideo.current.srcObject = currentStream;
+    }
+  });
+ }
   // useEffect(() => {
   //   // Ensure camera access is only requested when the modal is open and camera is active
   //   if (open && cameraActive) {
@@ -467,12 +489,14 @@ console.log('other user socket id = ',otherUserSocketId );
     connectionRef.current = peer;
   };
 
+  const navigate = useNavigate()
   const leaveCall = () => {
     setCallEnded(true);
 
-    connectionRef.current.destroy();
+    // connectionRef.current.destroy()
 
-    window.location.href='/'
+    // window.location.href='/'
+    navigate("/")
   };
 
   const onCallHandler = async (id) => {
@@ -515,33 +539,10 @@ console.log('other user socket id = ',otherUserSocketId );
         ref={containerRef}
         className="flex flex-col h-[91vh] bg-[url('https://images.unsplash.com/photo-1477840539360-4a1d23071046?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover object-cover"
       >
-        <div className="p-3 bg-zinc-800 shadow-lg flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <img
-              src={avatar}
-              alt="dj"
-              className="w-12 h-12 object-cover rounded-full shadow-lg"
-            />
-
-            <h2 className="font-semibold text-lg text-white ">{namee}</h2>
-          </div>
-
-          <div>
-            {/* Added a div to wrap the icon */}
-            <Tooltip title="Video Call" arrow>
-              <div
-                onClick={handleOpen}
-                className="text-gray-200 w-6 h-6 cursor-pointer mr-8"
-              >
-                <IoVideocamSharp />
-              </div>
-            </Tooltip>
-          </div>
-          {show && <VideoPlayer />}
-        </div>
+         <ChatHeader chatid = {chatId}/>
         <div className="overflow-y-scroll  flex-1 flex flex-col p-3 ">
           {allMessages.map((msg) => (
-            <MessageComponent message={msg} user={user} key={msg._id} />
+            <MessageComponent message={msg} user={user} namee={namee} avatar={avatar} key={msg._id} />
           ))}
 
           <div ref={bottomRef} />

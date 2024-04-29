@@ -42,18 +42,21 @@ const NewGroup = () => {
   // console.log(users)
 
   const groupName = useInputValidation("");
+  // console.log("group ka nam = ",groupName)
 
   const [selectedMembers, setSelectedMembers] = useState([]);
 
   const { isError, isLoading, error, data } = useAvailableFriendsQuery();
 
+  // console.log('new user ka data = ',data)
+
   const [newGroup] = useNewGroupMutation();
 
-  const addNewGroupHandler = async (name, members) => {
+  const addNewGroupHandler = async ({name, members}) => {
     try {
       const res = await newGroup({
-        name: groupName.value,
-        members: selectedMembers,
+        name,
+        members
       });
       console.log(res);
 

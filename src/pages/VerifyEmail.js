@@ -25,7 +25,7 @@ const navigate = useNavigate()
       if (response.data.success) {
         // Redirect to home page upon successful verification
         toast.success(response.data.message);
-        navigate("/")
+        window.location.href='/'
       } else {
         alert(response.data.message);
       }
